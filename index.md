@@ -3,8 +3,18 @@ layout: default
 title: Home
 ---
 
-# Youhex 2026  
+Hexyll-27
 
-🌍 **** <span id="current-time">Loading...</span>  
+<div id="clock" class="flip-clock">
+    <span id="current-time">Loading...</span>
+</div>
 
-☁️ **Weather:** <span id="weather">Loading...</span>  
+<div id="weather" class="weather-container">
+    <span id="weather-icon"></span>
+    <span id="weather-info">Loading...</span>
+</div>
+
+<div id="forecast" class="forecast-container">
+    <h2>7-Day Forecast</h2>
+    <div id="forecast-data"></div>
+</div>

@@ -17,15 +17,38 @@
             text-align: center;
         }
 
-        #clock {
-            font-size: 60px;
+        /* Flip Clock Styling */
+        .flip-clock {
             font-family: 'Courier New', Courier, monospace;
-            margin-bottom: 20px;
-            letter-spacing: 5px;
-            display: flex;
-            justify-content: center;
+            font-size: 70px;
+            display: inline-block;
+            margin: 20px 0;
+            color: #333;
+            background-color: black;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
         }
 
+        #current-time {
+            display: flex;
+            gap: 10px;
+        }
+
+        .time-unit {
+            width: 80px;
+            height: 120px;
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            font-size: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 5px;
+            box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Weather Container */
         .weather-container {
             font-size: 24px;
             display: flex;
@@ -40,92 +63,67 @@
             margin-right: 10px;
         }
 
+        /* Forecast Styling */
         .forecast-container {
             font-size: 18px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            margin-top: 20px;
         }
 
         .forecast-day {
             margin: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .forecast-day img {
+            width: 30px;
+            height: 30px;
+            margin-right: 10px;
         }
     </style>
 </head>
 <body>
     {{ content }}
 
+    <div id="clock" class="flip-clock">
+        <div id="current-time">
+            <div class="time-unit" id="hours">--</div>
+            <div class="time-unit" id="minutes">--</div>
+            <div class="time-unit" id="seconds">--</div>
+        </div>
+    </div>
+
+    <div id="weather" class="weather-container">
+        <span id="weather-icon"></span>
+        <span id="weather-info">Loading...</span>
+    </div>
+
+    <div id="forecast" class="forecast-container">
+        <h2>7-Day Forecast</h2>
+        <div id="forecast-data"></div>
+    </div>
+
     <script>
-        // Display current time (Analog Flip Clock style)
+        // Update time
         function updateTime() {
             const timeElement = document.getElementById("current-time");
             const now = new Date();
-            timeElement.innerText = now.toLocaleTimeString();
+            document.getElementById("hours").innerText = now.getHours().toString().padStart(2, '0');
+            document.getElementById("minutes").innerText = now.getMinutes().toString().padStart(2, '0');
+            document.getElementById("seconds").innerText = now.getSeconds().toString().padStart(2, '0');
         }
         setInterval(updateTime, 1000);
         updateTime();
 
-        // Fetch current weather
+        // Fetch weather data
         const apiKey = "8ff1ca69276c0e718a283ad1bbf636fb"; // Your new API Key
         const city = "Toronto"; // Change this to your location
 
         function fetchWeather() {
             const weatherElement = document.getElementById("weather-info");
             const iconElement = document.getElementById("weather-icon");
-            fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.main) {
-                        const temp = data.main.temp;
-                        const description = data.weather[0].description;
-                        const iconCode = data.weather[0].icon;
-                        weatherElement.innerText = `${temp}°C - ${description}`;
-                        iconElement.src = `http://openweathermap.org/img/wn/${iconCode}.png`;
-                    } else {
-                        weatherElement.innerText = "Weather data not available";
-                    }
-                })
-                .catch(error => {
-                    console.error("Weather fetch error:", error);
-                    weatherElement.innerText = "Error fetching weather";
-                });
-        }
-
-        fetchWeather();
-
-        // Fetch 7-day weather forecast
-        function fetchForecast() {
-            const forecastElement = document.getElementById("forecast-data");
-            fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=43.7&lon=-79.42&units=metric&exclude=current,minutely,hourly,alerts&appid=${apiKey}`)
-                .then(response => response.json())
-                .then(data => {
-                    data.daily.forEach((day, index) => {
-                        if (index < 7) {
-                            const date = new Date(day.dt * 1000);
-                            const dayName = date.toLocaleDateString("en", { weekday: 'short' });
-                            const temp = day.temp.day;
-                            const iconCode = day.weather[0].icon;
-                            const description = day.weather[0].description;
-                            forecastElement.innerHTML += `
-                                <div class="forecast-day">
-                                    <img src="http://openweathermap.org/img/wn/${iconCode}.png" alt="${description}" />
-                                    <p>${dayName}: ${temp}°C - ${description}</p>
-                                </div>`;
-                        }
-                    });
-                })
-                .catch(error => {
-                    console.error("Forecast fetch error:", error);
-                });
-        }
-
-        fetchForecast();
-    </script>
-</body>
-</html>
+            fetch(`https://api.openweathermap

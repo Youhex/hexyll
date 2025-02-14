@@ -4,43 +4,128 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ page.title }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            flex-direction: column;
+            text-align: center;
+        }
+
+        #clock {
+            font-size: 60px;
+            font-family: 'Courier New', Courier, monospace;
+            margin-bottom: 20px;
+            letter-spacing: 5px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .weather-container {
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        #weather-icon {
+            width: 50px;
+            height: 50px;
+            margin-right: 10px;
+        }
+
+        .forecast-container {
+            font-size: 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .forecast-day {
+            margin: 10px;
+        }
+    </style>
 </head>
 <body>
     {{ content }}
 
     <script>
-        // Display current time
+        // Display current time (Analog Flip Clock style)
         function updateTime() {
             const timeElement = document.getElementById("current-time");
             const now = new Date();
             timeElement.innerText = now.toLocaleTimeString();
         }
-        setInterval(updateTime, 1000); // Update every second
-        updateTime(); // Run once immediately
+        setInterval(updateTime, 1000);
+        updateTime();
 
         // Fetch current weather
-        const apiKey = "b67cc9f26c0869b5e2893d4f14606bd9"; // Your API Key
-        const city = "Ottawa"; // Change this to your location
+        const apiKey = "8ff1ca69276c0e718a283ad1bbf636fb"; // Your new API Key
+        const city = "Toronto"; // Change this to your location
 
         function fetchWeather() {
+            const weatherElement = document.getElementById("weather-info");
+            const iconElement = document.getElementById("weather-icon");
             fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`)
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
                 .then(data => {
-                    const weatherElement = document.getElementById("weather");
                     if (data.main) {
                         const temp = data.main.temp;
                         const description = data.weather[0].description;
+                        const iconCode = data.weather[0].icon;
                         weatherElement.innerText = `${temp}°C - ${description}`;
+                        iconElement.src = `http://openweathermap.org/img/wn/${iconCode}.png`;
                     } else {
                         weatherElement.innerText = "Weather data not available";
                     }
                 })
                 .catch(error => {
                     console.error("Weather fetch error:", error);
-                    document.getElementById("weather").innerText = "Error loading weather";
+                    weatherElement.innerText = "Error fetching weather";
                 });
         }
+
         fetchWeather();
+
+        // Fetch 7-day weather forecast
+        function fetchForecast() {
+            const forecastElement = document.getElementById("forecast-data");
+            fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=43.7&lon=-79.42&units=metric&exclude=current,minutely,hourly,alerts&appid=${apiKey}`)
+                .then(response => response.json())
+                .then(data => {
+                    data.daily.forEach((day, index) => {
+                        if (index < 7) {
+                            const date = new Date(day.dt * 1000);
+                            const dayName = date.toLocaleDateString("en", { weekday: 'short' });
+                            const temp = day.temp.day;
+                            const iconCode = day.weather[0].icon;
+                            const description = day.weather[0].description;
+                            forecastElement.innerHTML += `
+                                <div class="forecast-day">
+                                    <img src="http://openweathermap.org/img/wn/${iconCode}.png" alt="${description}" />
+                                    <p>${dayName}: ${temp}°C - ${description}</p>
+                                </div>`;
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error("Forecast fetch error:", error);
+                });
+        }
+
+        fetchForecast();
     </script>
 </body>
 </html>

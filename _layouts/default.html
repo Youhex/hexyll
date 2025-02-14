@@ -126,4 +126,58 @@
         function fetchWeather() {
             const weatherElement = document.getElementById("weather-info");
             const iconElement = document.getElementById("weather-icon");
-            fetch(`https://api.openweathermap
+            fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.main) {
+                        const temp = data.main.temp;
+                        const description = data.weather[0].description;
+                        const iconCode = data.weather[0].icon;
+                        weatherElement.innerText = `${temp}°C - ${description}`;
+                        iconElement.src = `http://openweathermap.org/img/wn/${iconCode}.png`;
+                    } else {
+                        weatherElement.innerText = "Weather data not available";
+                    }
+                })
+                .catch(error => {
+                    console.error("Weather fetch error:", error);
+                    weatherElement.innerText = "Error fetching weather";
+                });
+        }
+        fetchWeather();
+
+        // Fetch 7-day forecast
+        function fetchForecast() {
+            const forecastElement = document.getElementById("forecast-data");
+            fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=43.7&lon=-79.42&units=metric&exclude=current,minutely,hourly,alerts&appid=${apiKey}`)
+                .then(response => response.json())
+                .then(data => {
+                    data.daily.forEach((day, index) => {
+                        if (index < 7) {
+                            const date = new Date(day.dt * 1000);
+                            const dayName = date.toLocaleDateString("en", { weekday: 'short' });
+                            const temp = day.temp.day;
+                            const iconCode = day.weather[0].icon;
+                            const description = day.weather[0].description;
+                            forecastElement.innerHTML += `
+                                <div class="forecast-day">
+                                    <img src="http://openweathermap.org/img/wn/${iconCode}.png" alt="${description}" />
+                                    <p>${dayName}: ${temp}°C - ${description}</p>
+                                </div>`;
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error("Forecast fetch error:", error);
+                });
+        }
+
+        fetchForecast();
+    </script>
+</body>
+</html>

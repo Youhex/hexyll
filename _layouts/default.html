@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page.title }}</title>
+</head>
+<body>
+    {{ content }}
+
+    <script>
+        // Display current time
+        function updateTime() {
+            const timeElement = document.getElementById("current-time");
+            const now = new Date();
+            timeElement.innerText = now.toLocaleTimeString();
+        }
+        setInterval(updateTime, 1000); // Update every second
+        updateTime(); // Run once immediately
+
+        // Fetch current weather
+        const apiKey = "00f1efe688e94fe1876154753250302"; // Your API Key
+        const city = "Toronto"; // Change this to your location
+
+        function fetchWeather() {
+            fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`)
+                .then(response => response.json())
+                .then(data => {
+                    const weatherElement = document.getElementById("weather");
+                    if (data.main) {
+                        const temp = data.main.temp;
+                        const description = data.weather[0].description;
+                        weatherElement.innerText = `${temp}°C - ${description}`;
+                    } else {
+                        weatherElement.innerText = "Weather data not available";
+                    }
+                })
+                .catch(error => {
+                    console.error("Weather fetch error:", error);
+                    document.getElementById("weather").innerText = "Error loading weather";
+                });
+        }
+        fetchWeather();
+    </script>
+</body>
+</html>

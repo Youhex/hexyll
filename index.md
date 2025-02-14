@@ -3,5 +3,8 @@ layout: default
 title: Home
 ---
 
-# Welcome to My Jekyll Site
-This is a Jekyll-powered site hosted on GitHub Pages!
+# Welcome to My Jekyll Site  
+
+🌍 **Current Time:** <span id="current-time">Loading...</span>  
+
+☁️ **Weather:** <span id="weather">Loading...</span>  
